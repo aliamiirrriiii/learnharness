@@ -111,6 +111,16 @@
 	font-display: swap;
 }
 
+/* Persian (teeez fork, lib/i18n): Vazirmatn FD NL, SIL OFL 1.1
+   (public/fonts/Vazirmatn-OFL.txt). It has no Latin letters and draws the
+   ASCII digits as Persian ones, so it leads the chrome and prose stacks only
+   on a Persian page, through --lh-fa-lead, and never the code stack. */
+@font-face { font-family: "lh-fa"; src: url("/fonts/Vazirmatn-FD-NL-Regular.ttf") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "lh-fa"; src: url("/fonts/Vazirmatn-FD-NL-Medium.ttf") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "lh-fa"; src: url("/fonts/Vazirmatn-FD-NL-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "lh-fa"; src: url("/fonts/Vazirmatn-FD-NL-Bold.ttf") format("truetype"); font-weight: 700 900; font-display: swap; }
+:root[lang="fa"] { --lh-fa-lead: "lh-fa",; }
+
 @theme inline {
 	/* Fonts: chrome = JetBrains Mono, prose = Source Sans 3, titles = CMU
 	   Serif bold. The JetBrains/SourceSans variables attach in app/layout.tsx.
@@ -118,10 +128,10 @@
 	   fonts: `font-mono`/`font-sans` utilities would otherwise fall to the
 	   SYSTEM stacks — a fourth font the app never chose — and streamdown's
 	   code-block chrome + mermaid-error + demo-card all use them. */
-	--font-ui: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
-	--font-prose: var(--font-sans3), ui-sans-serif, system-ui, sans-serif;
+	--font-ui: var(--lh-fa-lead,) var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
+	--font-prose: var(--lh-fa-lead,) var(--font-sans3), ui-sans-serif, system-ui, sans-serif;
 	--font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, monospace;
-	--font-sans: var(--font-sans3), ui-sans-serif, system-ui, sans-serif;
+	--font-sans: var(--lh-fa-lead,) var(--font-sans3), ui-sans-serif, system-ui, sans-serif;
 	/* The modular type ladder — each size carries its own line-height.
 	   Component sizes must pull from this ladder. (owner, typography
 	   round 4: the 10px rung is merged into 11 — one pixel apart was a
