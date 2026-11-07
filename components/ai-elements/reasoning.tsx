@@ -8,6 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n";
 import { ChevronDownIcon } from "lucide-react";
 import { BrailleSpinner } from "@/components/braille-spinner";
 import type { ComponentProps, ReactNode } from "react";
@@ -136,9 +137,9 @@ export type ReasoningTriggerProps = ComponentProps<
    language; motion (spinner + shimmer) stays the working signal. */
 const defaultGetThinkingMessage = (isStreaming: boolean) => {
   if (isStreaming) {
-    return <Shimmer duration={1}>Thinking...</Shimmer>;
+    return <Shimmer duration={1}>{t("Thinking...")}</Shimmer>;
   }
-  return <p>AGENT’S THINKING</p>;
+  return <p>{t("AGENT’S THINKING")}</p>;
 };
 
 export const ReasoningTrigger = memo(
@@ -175,7 +176,7 @@ export const ReasoningTrigger = memo(
                 the component default (h-3) — IDENTICAL to the placeholder
                 spinner (owner, 2026-10-02): the handoff between the two
                 states must be visually seamless, one size everywhere. */}
-            {isStreaming && <BrailleSpinner label="Thinking" />}
+            {isStreaming && <BrailleSpinner label={t("Thinking")} />}
             {getThinkingMessage(isStreaming)}
             <ChevronDownIcon
               className={cn(

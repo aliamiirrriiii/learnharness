@@ -2,6 +2,7 @@
 
 import { useEffect, useLayoutEffect, useRef, type RefObject } from "react";
 import { sessionFindHasForegroundLayer } from "./session-find";
+import { DIR } from "@/lib/i18n";
 
 export interface ChainNavigationRow { key: string; depth: number; expanded?: boolean }
 export function chainRow(parts: string[], depth: number, expanded?: boolean) {
@@ -107,7 +108,9 @@ export function useChainNavigation(rootRef: RefObject<HTMLDivElement | null>, se
 				event.preventDefault(); event.stopPropagation(); checkbox.click(); highlight(row.key, true);
 				return;
 			}
-			const result = navigateChainRows(readRows(), fromSearch ? null : active.current, event.key);
+			// Right to left, the tree opens toward the left: the horizontal arrows swap.
+			const key = DIR === "rtl" && (event.key === "ArrowLeft" || event.key === "ArrowRight") ? (event.key === "ArrowLeft" ? "ArrowRight" : "ArrowLeft") : event.key;
+			const result = navigateChainRows(readRows(), fromSearch ? null : active.current, key);
 			if (!result.key) return;
 			event.preventDefault(); event.stopPropagation();
 			highlight(result.key, true);

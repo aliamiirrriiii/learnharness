@@ -2,6 +2,7 @@
 
 import { ChevronRight } from "lucide-react";
 import type { ArtifactPartProps } from "@/src/core";
+import { plural, t } from "@/lib/i18n";
 
 /**
  * The generic tool-call card (sources v1, 2026-09-19): a quiet, collapsed
@@ -52,7 +53,7 @@ function outputText(output: unknown): string | null {
 		const o = output as { text?: unknown; images?: unknown[] };
 		const text = typeof o.text === "string" ? o.text : null;
 		const n = Array.isArray(o.images) ? o.images.length : 0;
-		return n > 0 ? `${text ?? ""}\n[${n} image${n > 1 ? "s" : ""} attached to the model]`.trim() : text;
+		return n > 0 ? `${text ?? ""}\n${plural(n, "[{n} image attached to the model]", "[{n} images attached to the model]")}`.trim() : text;
 	}
 	try {
 		return JSON.stringify(output, null, 2);
@@ -78,15 +79,15 @@ export function ToolCallCard({ part }: ArtifactPartProps) {
 					{tool}
 				</span>
 				{arg && <span className="truncate">{arg}</span>}
-				<ChevronRight className="size-3 shrink-0 opacity-50 transition-transform group-open:rotate-90" />
+				<ChevronRight className="size-3 shrink-0 opacity-50 transition-transform group-open:rotate-90 rtl:-scale-x-100 rtl:group-open:-rotate-90" />
 			</summary>
 			<div className="mt-2 space-y-2 rounded-xl border bg-card p-3 text-xs">
 				{p.input != null && (
 					<div>
 						<div className="mb-1 font-medium uppercase tracking-wide text-muted-foreground">
-							Input
+							{t("Input")}
 						</div>
-						<pre className="max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed">
+						<pre dir="ltr" className="max-h-32 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed">
 							{JSON.stringify(p.input, null, 2)}
 						</pre>
 					</div>
@@ -94,24 +95,24 @@ export function ToolCallCard({ part }: ArtifactPartProps) {
 				{typeof p.errorText === "string" ? (
 					<div>
 						<div className="mb-1 font-medium uppercase tracking-wide text-muted-foreground">
-							Error
+							{t("Error")}
 						</div>
-						<pre className="whitespace-pre-wrap break-all font-mono text-[11px] text-red-500">
+						<pre dir="ltr" className="whitespace-pre-wrap break-all font-mono text-[11px] text-red-500">
 							{p.errorText}
 						</pre>
 					</div>
 				) : out != null ? (
 					<div>
 						<div className="mb-1 font-medium uppercase tracking-wide text-muted-foreground">
-							Output
+							{t("Output")}
 						</div>
-						<pre className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed">
+						<pre dir="ltr" className="max-h-64 overflow-auto whitespace-pre-wrap break-all font-mono text-[11px] leading-relaxed">
 							{out}
 						</pre>
 					</div>
 				) : (
 					p.state !== "output-available" && (
-						<div className="text-muted-foreground italic">running…</div>
+						<div className="text-muted-foreground italic">{t("running…")}</div>
 					)
 				)}
 			</div>

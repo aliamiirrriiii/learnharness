@@ -3,7 +3,9 @@ import type { AgentEvent, AgentMessage, AgentTool } from "@earendil-works/pi-age
 import { invalidInputResult, questionResult } from "./tool-execute.ts";
 import { providerEventObserver } from "./provider-events.ts";
 import type { Usage } from "@earendil-works/pi-ai";
-import { PATHS } from "../../config.ts";
+import fs from "node:fs";
+import path from "node:path";
+import { LOCALE, PATHS } from "../../config.ts";
 import { APP_IDENTITY, piEngineFor, type PiEngine } from "./models.ts";
 import { effectivePromptSegments } from "./prompt-segments.ts";
 import {
@@ -58,6 +60,14 @@ export type AgentKind = "prober" | "teacher" | "practice";
 // mirrors this loader's rules, shared/ included). The agent imports it for
 // the static-file seam; the local fragment discovery helpers are retired.
 
+/** The teaching language (teeez fork): a Persian build appends
+ *  prompts/locale/fa.md to every agent, after the source and override
+ *  segments, so a person's prompt overrides cannot drop it. Empty in the
+ *  English build, which composes byte for byte as upstream. */
+const LOCALE_INSTRUCTIONS = LOCALE === "fa"
+	? fs.readFileSync(path.join(PATHS.root, "src", "agent", "prompts", "locale", "fa.md"), "utf-8")
+	: "";
+
 /** Exported for tests: assert what composes into the model's prompt.
  *  Composition order: shared base → shared/ fragments (both agents, the
  *  sources-v1 seam for cross-agent doctrine) → the agent's own fragments.
@@ -76,8 +86,8 @@ export type AgentKind = "prober" | "teacher" | "practice";
  *  chat/job machinery. */
 export function composeInstructions(kind: AgentKind, switches?: Record<string, boolean>): string {
 	const segments = effectivePromptSegments(kind, switches ?? {});
-	return segments
-		.map((s) => (s.enabled ? s.overrideText! : s.sourceText))
+	return [...segments
+		.map((s) => (s.enabled ? s.overrideText! : s.sourceText)), LOCALE_INSTRUCTIONS]
 		.map((t) => t.trim())
 		.filter(Boolean)
 		.join("\n\n---\n\n");

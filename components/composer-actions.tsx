@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { DumbbellIcon } from "lucide-react";
+import { plural, t } from "@/lib/i18n";
 
 /** Home and the draft share one wrapping action row. Picker controls lead;
  * setup is centered only when it is the sole action. */
@@ -39,7 +40,7 @@ export function NodePickerControl({ count, onOpen, onClear }: {
 				}
 			>
 				<DumbbellIcon aria-hidden="true" className="size-3.5 text-muted-foreground" />
-				{count > 0 ? `${count} ${count === 1 ? "node" : "nodes"} selected` : "Pick nodes"}
+				{count > 0 ? plural(count, "{n} node selected", "{n} nodes selected") : t("Pick nodes")}
 			</button>
 			{count > 0 && (
 				<button
@@ -48,7 +49,7 @@ export function NodePickerControl({ count, onOpen, onClear }: {
 					onClick={onClear}
 					className="cursor-pointer rounded-full px-2 py-1 font-ui text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
 				>
-					Clear
+					{t("Clear")}
 				</button>
 			)}
 		</div>

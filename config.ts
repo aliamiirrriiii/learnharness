@@ -26,6 +26,9 @@ const DATA_ROOT = process.env.LH_DATA_DIR
  * browser (demo) are forced off. Unset, nothing changes.
  */
 export const HOSTED = process.env.LH_HOSTED === "1";
+/** The UI and teaching language (lib/i18n is the browser's twin): "fa"
+ *  composes prompts/locale/fa.md into every agent's instructions. */
+export const LOCALE: "en" | "fa" = process.env.NEXT_PUBLIC_LH_LOCALE === "fa" ? "fa" : "en";
 
 export const PATHS = {
 	root: ROOT,

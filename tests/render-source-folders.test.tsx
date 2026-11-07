@@ -33,13 +33,13 @@ it("source inventory includes unextracted chats and zero-graph imported books; o
 	assert.match(html, /lucide-book/); assert.match(html, /lucide-folder/);
 	assert.match(html, /data-testid="add-source-folder"/); assert.match(html, /data-testid="source-root-drop"/);
 	assert.doesNotMatch(html, /Top level/);
-	assert.match(html, /data-testid="folder-thread-f1"[^>]*style="left:37px"/);
-	assert.match(html, /data-testid="folder-thread-f2"[^>]*style="left:73px"/);
-	assert.match(html, /data-testid="source-separator-notes"[^>]*style="left:1px"/);
-	assert.match(html, /data-testid="folder-separator-f2"[^>]*style="left:37px"/);
+	assert.match(html, /data-testid="folder-thread-f1"[^>]*style="inset-inline-start:37px"/);
+	assert.match(html, /data-testid="folder-thread-f2"[^>]*style="inset-inline-start:73px"/);
+	assert.match(html, /data-testid="source-separator-notes"[^>]*style="inset-inline-start:1px"/);
+	assert.match(html, /data-testid="folder-separator-f2"[^>]*style="inset-inline-start:37px"/);
 	assert.match(html, /data-testid="folder-icon-f2"[^>]*aria-expanded="true"/);
 	assert.match(html, /data-testid="source-icon-notes"[^>]*aria-expanded="false"/);
-	assert.match(html, /data-testid="cluster-group-notes"[^>]*style="margin-left:72px"/);
+	assert.match(html, /data-testid="cluster-group-notes"[^>]*style="margin-inline-start:72px"/);
 	assert.doesNotMatch(html, /No matching chains/);
 });
 it("nested folders aggregate unique graph member counts, keep three-column sorting and expose root placement", () => {

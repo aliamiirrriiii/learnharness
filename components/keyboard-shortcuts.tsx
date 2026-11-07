@@ -37,6 +37,8 @@ import {
 } from "@/src/core";
 import { isDictationActive } from "@/components/dictation";
 import { useSettingsDialog } from "@/components/settings/settings-dialog.tsx";
+import { actionLabel } from "@/components/settings/keyboard-section.tsx";
+import { t } from "@/lib/i18n";
 
 // Re-exported for the contract pin (tests/keyboard-toggle-sidebar.test.ts):
 // the dispatcher composes event names through the ONE helper — a second
@@ -155,9 +157,9 @@ function CheatSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 	if (!open) return null;
 	const scopes = ["global", "chat", "graph"] as const;
 	const scopeLabels: Record<(typeof scopes)[number], string> = {
-		global: "Global",
-		chat: "Chat",
-		graph: "Graph view",
+		global: t("Global"),
+		chat: t("Chat"),
+		graph: t("Graph view"),
 	};
 	return (
 		<div
@@ -170,8 +172,8 @@ function CheatSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 				onClick={(e) => e.stopPropagation()}
 			>
 				<div className="mb-4 flex items-baseline justify-between">
-					<span className="text-sm font-medium text-card-foreground">Keyboard shortcuts</span>
-					<span className="text-xs text-muted-foreground">Esc to close</span>
+					<span className="text-sm font-medium text-card-foreground">{t("Keyboard shortcuts")}</span>
+					<span className="text-xs text-muted-foreground">{t("Esc to close")}</span>
 				</div>
 				{scopes.map((scope) => {
 					const actions = KEYBOARD_ACTIONS.filter((a) => a.scope === scope);
@@ -184,8 +186,8 @@ function CheatSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 							<div className="flex flex-col gap-1">
 								{actions.map((a) => (
 									<div key={a.id} className="flex items-center justify-between gap-4 text-sm">
-										<span className="text-muted-foreground">{a.label}</span>
-										<kbd className="rounded-md border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-card-foreground">
+										<span className="text-muted-foreground">{actionLabel(a)}</span>
+										<kbd dir="ltr" className="rounded-md border border-border bg-background px-1.5 py-0.5 font-mono text-xs text-card-foreground">
 											{formatBinding(bindingForAction(a.id))}
 										</kbd>
 									</div>

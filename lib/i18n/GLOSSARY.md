@@ -31,6 +31,7 @@ literal wording for errors, costs and anything destructive.
 | problem (in practice) | مسئله |
 | knowledge graph, Graph (the view) | نقشهٔ دانش |
 | proposition | گزاره |
+| node (a proposition in the graph) | گزاره; «گره» only in the drawing settings (Node size), where it means the dot |
 | chain, reasoning chain | زنجیرهٔ استدلال |
 | premise / conclusion | مقدمه / نتیجه |
 | source | منبع |

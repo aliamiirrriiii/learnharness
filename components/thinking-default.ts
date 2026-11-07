@@ -14,6 +14,7 @@
  */
 import { DEFAULT_THINKING_ORDER } from "@/src/core";
 import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
+import { t } from "@/lib/i18n";
 
 /** Display labels for the levels (shared by every trigger that shows
  *  one). Lowercase, always (owner refinement round, 2026-09-24): the
@@ -21,13 +22,13 @@ import type { ThinkingLevel } from "@earendil-works/pi-agent-core";
  *  raw, so the composer pill and setup dialog must match, never Title
  *  Case. */
 export const THINKING_LABEL: Record<string, string> = {
-	off: "off",
-	minimal: "minimal",
-	low: "low",
-	medium: "medium",
-	high: "high",
-	xhigh: "xhigh",
-	max: "max",
+	off: t("off"),
+	minimal: t("minimal"),
+	low: t("low"),
+	medium: t("medium"),
+	high: t("high"),
+	xhigh: t("xhigh"),
+	max: t("max"),
 };
 
 /** The level a fresh pick of `supported` populates with. Empty support

@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { t } from "@/lib/i18n";
 
 /**
  * THE BRAILLE SPINNER (owner, minimal-color round): the one working-state
@@ -36,7 +37,7 @@ export const SPINNER_FRAMES = FRAMES.length;
 
 export function BrailleSpinner({
 	className,
-	label = "Working",
+	label = t("Working"),
 }: {
 	/** Sizing/position classes; height drives the scale (width is the cell's 1:2 aspect). */
 	className?: string;

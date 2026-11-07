@@ -24,15 +24,43 @@ import {
 	loadOverrides,
 	saveOverrides,
 	type KeyAction,
+	type KeyActionDef,
 	type KeyScope,
 } from "@/src/core";
+import { t } from "@/lib/i18n";
 import { SettingsRow } from "./controls.tsx";
 
 const SCOPES: { scope: KeyScope; label: string }[] = [
-	{ scope: "global", label: "Global" },
-	{ scope: "chat", label: "Chat" },
-	{ scope: "graph", label: "Graph" },
+	{ scope: "global", label: t("Global") },
+	{ scope: "chat", label: t("Chat") },
+	{ scope: "graph", label: t("Graph") },
 ];
+
+/** The registry's labels as shown (src/core/keyboard.ts keeps the English);
+ *  shared with the cheat sheet. */
+const ACTION_LABELS: Record<KeyAction, string> = {
+	"toggle-dictation": t("Toggle dictation"),
+	"open-settings": t("Open settings"),
+	"open-model-picker": t("Model selector"),
+	"cycle-thinking": t("Cycle thinking level"),
+	"toggle-sidebar": t("Toggle sessions sidebar"),
+	"sessions-search": t("Search sessions"),
+	"jump-graph": t("Graph view"),
+	"new-session": t("New session"),
+	"rename-session": t("Rename session"),
+	"toggle-user-thinking": t("Toggle all your thinking"),
+	"find": t("Find"),
+	"cheat-sheet": t("Shortcut cheat sheet"),
+	"question-focus": t("Question · focus thinking ↔ rows"),
+	"question-next-row": t("Question · next row"),
+	"question-prev-row": t("Question · previous row"),
+	"question-pick-row": t("Question · pick row"),
+	"question-submit": t("Question · submit"),
+};
+
+export function actionLabel(def: KeyActionDef): string {
+	return ACTION_LABELS[def.id] ?? def.label;
+}
 
 /** The overrides map after ONE change (pure — exported for tests):
  *  binding null = reset the action to its default (key removed). */
@@ -108,13 +136,13 @@ export function KeyboardSection() {
 								return (
 									<SettingsRow
 										key={def.id}
-										label={def.label}
-										hint={def.displayOnly ? "Fixed — part of this screen" : undefined}
+										label={actionLabel(def)}
+										hint={def.displayOnly ? t("Fixed — part of this screen") : undefined}
 										testid={`kbd-row-${def.id}`}
 									>
 										<span className="flex items-center gap-2">
-											<kbd className="rounded-sm border border-border bg-muted px-1.5 py-0.5 font-ui text-xs">
-												{rebinding === def.id ? "Press keys…" : formatBinding(effective)}
+											<kbd dir={rebinding === def.id ? undefined : "ltr"} className="rounded-sm border border-border bg-muted px-1.5 py-0.5 font-ui text-xs">
+												{rebinding === def.id ? t("Press keys…") : formatBinding(effective)}
 											</kbd>
 											{def.displayOnly ? null : rebinding === def.id ? (
 												<button
@@ -122,7 +150,7 @@ export function KeyboardSection() {
 													onClick={() => setRebinding(null)}
 													className="text-xs text-muted-foreground/70 underline-offset-2 hover:text-foreground hover:underline"
 												>
-													Cancel
+													{t("Cancel")}
 												</button>
 											) : (
 												<>
@@ -132,7 +160,7 @@ export function KeyboardSection() {
 														data-testid={`kbd-rebind-${def.id}`}
 														className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
 													>
-														Rebind
+														{t("Rebind")}
 													</button>
 													{overridden(def.id) && (
 														<button
@@ -141,7 +169,7 @@ export function KeyboardSection() {
 															data-testid={`kbd-reset-${def.id}`}
 															className="text-xs text-muted-foreground/70 underline-offset-2 hover:text-foreground hover:underline"
 														>
-															Reset
+															{t("Reset")}
 														</button>
 													)}
 												</>
@@ -155,14 +183,14 @@ export function KeyboardSection() {
 				);
 			})}
 			<div className="mt-1 flex items-center justify-between">
-				<span className="text-xs text-muted-foreground/70">Stored on this device (lh:keymap) — overrides only.</span>
+				<span className="text-xs text-muted-foreground/70">{t("Stored on this device (lh:keymap) — overrides only.")}</span>
 				<button
 					type="button"
 					onClick={resetAll}
 					data-testid="kbd-reset-all"
 					className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
 				>
-					Reset all to defaults
+					{t("Reset all to defaults")}
 				</button>
 			</div>
 		</>

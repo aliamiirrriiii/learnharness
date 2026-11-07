@@ -85,7 +85,7 @@ describe("md-blocks — tables", () => {
 		// The corner is CONTAINED in the table (top-1 right-1, not the old
 		// -top-3 that straddled the top outline — the 24px button at a 12px
 		// offset sat half over the border; owner report, 2026-09-19).
-		assert.match(html, /absolute top-1 right-1 z-10/, "the corner sits inside the table's top-right");
+		assert.match(html, /absolute top-1 end-1 z-10/, "the corner sits inside the table's top-right");
 		// Table text runs at the session prose size — no text-sm pin (the
 		// cells' own text-sm is overridden to inherit via globals.css).
 		assert.ok(!/border-collapse text-sm/.test(html), "the table itself pins no smaller text size");
@@ -249,7 +249,7 @@ describe("md-blocks — the restored plain blockquote (owner round, 2026-10-07)"
 		const html = renderToStaticMarkup(
 			<MessageResponse mode="static">{"Before.\n\n> An ordinary quote.\n\nAfter."}</MessageResponse>,
 		);
-		assert.ok(html.includes("border-l-4"), "the left border is back");
+		assert.ok(html.includes("border-s-4"), "the left border is back");
 		assert.ok(html.includes("text-muted-foreground italic"), "muted italic — the quote register");
 		assert.ok(!html.includes("md-callout"), "a plain quote is not a callout box");
 	});

@@ -1,11 +1,16 @@
 /**
  * Money/token presentation helpers (wave-4 observability UI) — shared by the
- * activity dock and the stats bar. Pure; exported for tests.
+ * activity dock and the stats bar. Pure; exported for tests. Digits follow
+ * the UI locale (Persian digits under fa); English output is unchanged.
  */
+
+import { formatNumber } from "@/lib/i18n";
+
+const FIXED = (digits: number): Intl.NumberFormatOptions => ({ minimumFractionDigits: digits, maximumFractionDigits: digits, useGrouping: false });
 
 /** USD for cent-scale money: >= $1 keeps two decimals, smaller keeps four. */
 export function formatUsd(c: number): string {
-	return c >= 1 ? `$${c.toFixed(2)}` : `$${c.toFixed(4)}`;
+	return c >= 1 ? `$${formatNumber(c, FIXED(2))}` : `$${formatNumber(c, FIXED(4))}`;
 }
 
 export function planCostLabel(dollars: number | null, subscription: boolean | string | readonly string[] | undefined, format = formatUsd): string {
@@ -15,9 +20,9 @@ export function planCostLabel(dollars: number | null, subscription: boolean | st
 
 /** 38000 → "38k", 1234567 → "1.2M" — trimmed, never "38.0k". */
 export function formatTokens(n: number): string {
-	if (n >= 1e6) return `${+(n / 1e6).toFixed(1)}M`;
-	if (n >= 1e3) return `${+(n / 1e3).toFixed(1)}k`;
-	return String(n);
+	if (n >= 1e6) return `${formatNumber(+(n / 1e6).toFixed(1), { useGrouping: false })}M`;
+	if (n >= 1e3) return `${formatNumber(+(n / 1e3).toFixed(1), { useGrouping: false })}k`;
+	return formatNumber(n, { useGrouping: false, maximumFractionDigits: 20 });
 }
 
 /** Split a provider-qualified stamp "provider:id" (the usage contracts'

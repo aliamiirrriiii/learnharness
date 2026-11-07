@@ -7,6 +7,7 @@ import { isSubagentFailure } from "@/src/core";
 import { DemoOutputCard } from "@/components/artifacts/demo-card";
 import { PdfBriefCard, ResearchBriefCard } from "@/components/artifacts/job-card";
 import { VisualOutputCard } from "@/components/artifacts/visual-card";
+import { plural, t } from "@/lib/i18n";
 
 /**
  * The sub-agent result delivery card (contracts.ts "THE ASYNC PROTOCOL" §4).
@@ -38,7 +39,7 @@ export function SubagentSteerCard({ message }: { message: LhViewMessage }) {
 		if (aborted?.data) return <AbortedBadge kind={aborted.data.kind ?? "job"} />;
 		return (
 				<div className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-				A sub-agent finished, but its result could not be displayed.
+				{t("A sub-agent finished, but its result could not be displayed.")}
 			</div>
 		);
 	}
@@ -62,6 +63,24 @@ export function SubagentSteerCard({ message }: { message: LhViewMessage }) {
 	}
 }
 
+/** The job kind as shown on the aborted chip; the stored kind stays the id. */
+function jobKindLabel(kind: string): string {
+	switch (kind) {
+		case "research":
+			return t("Research");
+		case "demo":
+			return t("Demo");
+		case "visual":
+			return t("Figure");
+		case "pdf":
+			return "PDF";
+		case "job":
+			return t("Job");
+		default:
+			return kind;
+	}
+}
+
 /** The aborted-job chip: mirrors the complete-badge one-liner — the
  * teacher's wake turn acknowledges the abort in the lesson itself,
  * this just marks what happened. */
@@ -69,8 +88,8 @@ function AbortedBadge({ kind }: { kind: string }) {
 	return (
 		<div data-testid="job-aborted-badge" className="flex items-center gap-2 text-xs text-muted-foreground">
 			<CircleX className="size-3.5" />
-			<span className="font-medium uppercase tracking-wide">{kind}</span>
-			<span>aborted by the learner</span>
+			<span className="font-medium uppercase tracking-wide">{jobKindLabel(kind)}</span>
+			<span>{t("aborted by the learner")}</span>
 		</div>
 	);
 }
@@ -88,14 +107,14 @@ function PdfCompleteBadge({ result }: { result: PdfResult }) {
 			<summary className="flex cursor-pointer select-none list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
 				<CheckIcon className="size-3.5" />
 				<span className="font-medium uppercase tracking-wide">PDF</span>
-				<span>reading complete</span>
+				<span>{t("reading complete")}</span>
 				{readPages.length > 0 && (
 					<span>
-						· read {readPages.length} page{readPages.length === 1 ? "" : "s"}
+						{plural(readPages.length, "· read {n} page", "· read {n} pages")}
 					</span>
 				)}
-				<span className="ml-1 text-xs text-muted-foreground/70 group-open:hidden">view brief</span>
-				<span className="ml-1 hidden text-xs text-muted-foreground/70 group-open:inline">hide brief</span>
+				<span className="ms-1 text-xs text-muted-foreground/70 group-open:hidden">{t("view brief")}</span>
+				<span className="ms-1 hidden text-xs text-muted-foreground/70 group-open:inline">{t("hide brief")}</span>
 			</summary>
 			<div className="mt-2">
 				<PdfBriefCard output={result} />
@@ -114,11 +133,11 @@ function ResearchCompleteBadge({ result }: { result: ResearchResult }) {
 		<details data-testid="research-complete-badge" className="group w-full text-xs text-muted-foreground">
 			<summary className="flex cursor-pointer select-none list-none items-center gap-2 [&::-webkit-details-marker]:hidden">
 				<CheckIcon className="size-3.5" />
-				<span className="font-medium uppercase tracking-wide">Research</span>
-				<span>complete</span>
-				{result.sources.length > 0 && <span>· {result.sources.length} sources</span>}
-				<span className="ml-1 text-xs text-muted-foreground/70 group-open:hidden">view brief</span>
-				<span className="ml-1 hidden text-xs text-muted-foreground/70 group-open:inline">hide brief</span>
+				<span className="font-medium uppercase tracking-wide">{t("Research")}</span>
+				<span>{t("complete")}</span>
+				{result.sources.length > 0 && <span>{t("· {n} sources", { n: result.sources.length })}</span>}
+				<span className="ms-1 text-xs text-muted-foreground/70 group-open:hidden">{t("view brief")}</span>
+				<span className="ms-1 hidden text-xs text-muted-foreground/70 group-open:inline">{t("hide brief")}</span>
 			</summary>
 			<div className="mt-2">
 				<ResearchBriefCard output={result} />

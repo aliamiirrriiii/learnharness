@@ -1,4 +1,5 @@
 import type { Phase3 } from "@/src/core";
+import { plural, t } from "@/lib/i18n";
 
 /**
  * The in-session phase presentation (owner, minimal-color round —
@@ -26,9 +27,9 @@ import type { Phase3 } from "@/src/core";
 
 /** Header-chip labels: the phases as the learner thinks of them. */
 const CHIP_LABEL: Record<Phase3, string> = {
-	probe: "Probing",
-	plan: "Planning",
-	teach: "Teaching",
+	probe: t("Probing"),
+	plan: t("Planning"),
+	teach: t("Teaching"),
 };
 
 /** The header label: the phase as a quiet flat tag (owner,
@@ -63,7 +64,7 @@ export function PhaseDivider({ phase, nodeCount }: { phase: Phase3; nodeCount?: 
 	if (phase === "probe") return null;
 	const label =
 		phase === "plan" && nodeCount
-			? `Plan · ${nodeCount} node${nodeCount === 1 ? "" : "s"}`
+			? plural(nodeCount, "Plan · {n} node", "Plan · {n} nodes")
 			: CHIP_LABEL[phase];
 	return (
 		<div className="my-4 flex w-full items-center gap-3" data-testid={`phase-divider-${phase}`}>
