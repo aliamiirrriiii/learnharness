@@ -19,7 +19,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { SETTINGS_FILE } from "../../config.ts";
+import { HOSTED, HOSTED_DISABLED_TOOLS, SETTINGS_FILE, UPLOADS_DIR } from "../../config.ts";
 import {
 	sanitizeUserSettings,
 	type UserSettings,
@@ -69,7 +69,22 @@ function settingsAreAbsent(): boolean {
 	}
 }
 
-export function readFileAccessSettings(): FileAccessSettingsResult {
+/** Hosted mode's fixed policy: learner files are the person's uploads and
+ * nothing else, and the browser-run demo tool is off. Applied on every read
+ * and every write, so a saved or submitted settings record cannot widen it.
+ * Exported with `hosted` as a parameter for the tests. */
+export function applyHostedPolicy(settings: UserSettings, hosted = HOSTED): UserSettings {
+	if (!hosted) return settings;
+	const tools = { ...settings.agent?.tools };
+	for (const id of HOSTED_DISABLED_TOOLS) tools[id] = false;
+	return {
+		...settings,
+		agent: { ...settings.agent, tools, fileAccess: { restricted: true, folders: [UPLOADS_DIR] } },
+	};
+}
+
+export function readFileAccessSettings(hosted = HOSTED): FileAccessSettingsResult {
+	if (hosted) return { ok: true, settings: { restricted: true, folders: [UPLOADS_DIR] } };
 	let raw: string;
 	try { raw = fs.readFileSync(SETTINGS_FILE, "utf-8"); }
 	catch (error) {
@@ -85,19 +100,21 @@ export function readFileAccessSettings(): FileAccessSettingsResult {
  *  migration chain on every read — cheap: a no-op file check when current. */
 export function readSettings(): UserSettings | null {
 	let raw: string;
+	// Hosted: factory defaults would leave the forced-off tools on.
+	const absent = (): UserSettings | null => (HOSTED ? applyHostedPolicy({ version: 1 }) : null);
 	try {
 		raw = fs.readFileSync(SETTINGS_FILE, "utf-8");
 	} catch {
-		return null; // no settings.json yet — first boot, all factory defaults
+		return absent(); // no settings.json yet — first boot, all factory defaults
 	}
 	let parsed: unknown;
 	try {
 		parsed = JSON.parse(raw);
 	} catch {
-		return null; // corrupt → first-boot semantics (all factory defaults)
+		return absent(); // corrupt → first-boot semantics (all factory defaults)
 	}
 	const record = sanitizeUserSettings(parsed);
-	if (!record) return null;
+	if (!record) return absent();
 	if (!fileAccessFromRecord(parsed).ok) {
 		// Unrelated section writes carry this safe placeholder, not a dropped
 		// malformed policy that would silently restore unrestricted reads.
@@ -106,13 +123,14 @@ export function readSettings(): UserSettings | null {
 	// Version chain (empty today): a future v2 migration slots in here —
 	// `if (record.version > CURRENT_SETTINGS_VERSION) …`. Unknown NEWER
 	// versions pass through untouched (the sanitizer preserved unknowns).
-	return record;
+	return applyHostedPolicy(record);
 }
 
 /** Persist the record (sanitized). Returns what was written. */
 export function writeSettings(raw: unknown): UserSettings {
-	const settings = sanitizeUserSettings(raw);
-	if (!settings) throw new Error("settings record must be a JSON object");
+	const sanitized = sanitizeUserSettings(raw);
+	if (!sanitized) throw new Error("settings record must be a JSON object");
+	const settings = applyHostedPolicy(sanitized);
 	if (!readFileAccessSettings().ok && settings.agent?.fileAccess === undefined) {
 		// A whole-file corruption cannot be carried by readSettings (null).
 		// Saving another preference repairs it into a BLOCKED policy unless

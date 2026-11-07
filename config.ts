@@ -18,6 +18,15 @@ const DATA_ROOT = process.env.LH_DATA_DIR
 	? path.resolve(process.env.LH_DATA_DIR)
 	: path.join(ROOT, "data");
 
+/**
+ * Hosted mode (teeez fork): LH_HOSTED=1 runs one server per person behind
+ * the teeez supervisor (llm-gateway/learnharness/). The person's files
+ * come in as uploads, so learner-file access is forced to UPLOADS_DIR and
+ * cannot be widened from Settings; tools that run model-written code in a
+ * browser (demo) are forced off. Unset, nothing changes.
+ */
+export const HOSTED = process.env.LH_HOSTED === "1";
+
 export const PATHS = {
 	root: ROOT,
 	/** Teacher system prompt — the agent's instructions (src/agent/). */
@@ -26,6 +35,8 @@ export const PATHS = {
 	/** Chat sessions (AI SDK UIMessage transcripts, one JSON file per chat). */
 	chats: path.join(DATA_ROOT, "chats"),
 	graph: path.join(DATA_ROOT, "graph"),
+	/** Hosted mode's attachments: files the person uploads (HOSTED). */
+	uploads: path.join(DATA_ROOT, "uploads"),
 	/** Debug artifacts (env-gated): data/debug/provider-events/<chatId>.jsonl
 	 * raw provider stream recordings (src/agent/provider-events.ts). */
 	debug: path.join(DATA_ROOT, "debug"),
@@ -126,6 +137,11 @@ export const SETTINGS_FILE = path.join(DATA_ROOT, "settings.json");
  * remove, or reorder fragments adapt automatically; an override keyed to
  * a vanished segment stops composing but stays on disk.
  */
+/** Hosted mode: the only folder learner-file tools may read. */
+export const UPLOADS_DIR = path.join(DATA_ROOT, "uploads");
+/** Hosted mode: tools forced off whatever settings.json says. */
+export const HOSTED_DISABLED_TOOLS = ["demo"] as const;
+
 export const PROMPTS_OVERRIDE_DIR = path.join(DATA_ROOT, "prompts");
 
 /**

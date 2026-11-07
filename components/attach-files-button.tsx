@@ -6,7 +6,8 @@ import { PaperclipIcon } from "lucide-react";
 import { directoryReferencePath, quoteFilePath } from "@/src/core";
 import { Hint } from "@/components/ui/hint";
 import { INSERT_FILE_PATHS_EVENT } from "@/components/path-input";
-import { BROWSER_NOTICE } from "@/components/file-path-drop-zone";
+import { BROWSER_NOTICE, uploadNotice } from "@/components/file-path-drop-zone";
+import { HOSTED_UI, uploadFiles } from "@/lib/hosted";
 
 /** Picked files → the rooted paths an editor chips (issue #285), via the
  *  desktop bridge. Same validity rule as drops: a file without a usable
@@ -45,6 +46,11 @@ const noSubscribe = () => () => {};
 function useDesktopPaths(): boolean {
 	return useSyncExternalStore(noSubscribe, () => Boolean(window.lh?.getPathForFile), () => false);
 }
+/** Hosted mode attaches by upload, so the button works in any browser. */
+function useCanAttach(): boolean {
+	const desktop = useDesktopPaths();
+	return desktop || HOSTED_UI;
+}
 
 /**
  * The attach button (issue #285): the picker's twin of a file drop — files
@@ -57,7 +63,7 @@ function useDesktopPaths(): boolean {
  */
 export function AttachFilesButton({ editorRef }: { editorRef: React.RefObject<HTMLDivElement | null> }) {
 	const pickerRef = useRef<HTMLInputElement>(null);
-	const desktop = useDesktopPaths();
+	const desktop = useCanAttach();
 	const buttonRef = useRef<HTMLButtonElement>(null);
 	const popupRef = useRef<HTMLDivElement>(null);
 	const choosingFolder = useRef(false);
@@ -126,13 +132,24 @@ export function AttachFilesButton({ editorRef }: { editorRef: React.RefObject<HT
 				hidden
 				data-testid="attach-files-input"
 				onChange={(e) => {
+					if (HOSTED_UI) {
+						const files = Array.from(e.currentTarget.files ?? []);
+						const editor = editorRef.current;
+						e.currentTarget.value = "";
+						if (files.length === 0) return;
+						void uploadFiles(files).then((outcome) => {
+							if (!outcome.ok) { setNotice(uploadNotice(outcome.error)); return; }
+							if (editor?.isConnected) editor.dispatchEvent(new CustomEvent(INSERT_FILE_PATHS_EVENT, { detail: outcome.paths }));
+						});
+						return;
+					}
 					const resolve = window.lh?.getPathForFile;
 					const { paths } = resolve ? pathsForFiles(Array.from(e.currentTarget.files ?? []), resolve) : { paths: [] };
 					if (paths.length > 0) editorRef.current?.dispatchEvent(new CustomEvent(INSERT_FILE_PATHS_EVENT, { detail: paths }));
 					e.currentTarget.value = ""; // allow re-picking the same file
 				}}
 			/>
-			<Hint label={desktop ? "Attach files or a folder" : BROWSER_NOTICE}>
+			<Hint label={HOSTED_UI ? "Attach files" : desktop ? "Attach files or a folder" : BROWSER_NOTICE}>
 				<button
 					ref={buttonRef}
 					type="button"
@@ -141,7 +158,13 @@ export function AttachFilesButton({ editorRef }: { editorRef: React.RefObject<HT
 					aria-haspopup="menu"
 					aria-expanded={open}
 					data-testid="attach-files"
-					onClick={() => { if (desktop) { setNotice(""); setOpen(!open); } }}
+					onClick={() => {
+						if (!desktop) return;
+						setNotice("");
+						// Hosted uploads are files only: a folder has no upload form.
+						if (HOSTED_UI) pickerRef.current?.click();
+						else setOpen(!open);
+					}}
 					className="flex size-10 shrink-0 items-center justify-center rounded-[10px] text-muted-foreground transition-colors hover:bg-accent hover:text-foreground aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent aria-disabled:hover:text-muted-foreground"
 				>
 					<PaperclipIcon className="size-4" />

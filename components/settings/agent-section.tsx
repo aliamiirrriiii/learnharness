@@ -51,6 +51,7 @@
  * missing (the toggle painted its old state until a remount re-fetched).
  */
 
+import { HOSTED_UI } from "@/lib/hosted";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { CacheRetention } from "@earendil-works/pi-ai";
 import { CacheRetentionMenu, cacheRetentionLabel } from "./cache-retention-menu.tsx";
@@ -835,7 +836,8 @@ export function AgentSection({
 						</SettingsRow>
 					);
 				})()}
-				{TOGGLE_TOOLS.map((id) => (
+				{/* Hosted mode forces demo off (config.ts HOSTED_DISABLED_TOOLS), so no row. */}
+				{TOGGLE_TOOLS.filter((id) => !HOSTED_UI || id !== "demo").map((id) => (
 					<SettingsRow
 						key={id}
 						label={`Tool · ${id}`}
@@ -848,7 +850,8 @@ export function AgentSection({
 						/>
 					</SettingsRow>
 				))}
-				{(() => {
+				{/* Hosted mode: file access is the person's uploads, fixed on the server. */}
+				{!HOSTED_UI && (() => {
 					const folders = agent?.fileAccess?.folders ?? [];
 					const restricted = Boolean(fileAccessError) || agent?.fileAccess?.restricted === true;
 					const effectiveAgent = fileAccessError ? { ...agent, fileAccess: { restricted: true, folders } } : agent;
@@ -890,7 +893,8 @@ export function AgentSection({
 						</div>
 					);
 				})()}
-				{(() => {
+				{/* Hosted mode: no search keys to choose between. */}
+				{!HOSTED_UI && (() => {
 					const engine = agent?.search?.engine ?? null;
 					const anyKey = SEARCH_ENGINES.some(({ id }) => engineKeys[id] === true);
 					const open = openMenu?.target === "search";

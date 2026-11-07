@@ -41,6 +41,7 @@ import {
 } from "@/src/core";
 import { useAppearance } from "./appearance.tsx";
 import { SettingsSection } from "./controls.tsx";
+import { HOSTED_UI } from "@/lib/hosted";
 import { UpdateSettings } from "./update-settings.tsx";
 import { AgentSection } from "./agent-section.tsx";
 import type { ModelsSettings } from "@/src/core";
@@ -56,7 +57,7 @@ import { NativeSubscriptionUIProvider } from "./subscription-connections.tsx";
 /** Owner (2026-09-20): hints earn their place — mechanics-explaining
  *  prose is out; only the keyboard note stays (storage location is a
  *  real question users ask). */
-const SECTIONS = [
+const ALL_SECTIONS = [
 	{ id: "keys", label: "Providers" },
 	{ id: "agent", label: "Agent" },
 	{ id: "appearance", label: "Appearance" },
@@ -64,7 +65,14 @@ const SECTIONS = [
 	{ id: "keyboard", label: "Keyboard", hint: "Stored on this device" },
 	{ id: "general", label: "General" },
 ] as const;
-type SectionId = (typeof SECTIONS)[number]["id"];
+type SectionId = (typeof ALL_SECTIONS)[number]["id"];
+/** Hosted mode: providers and keys come from teeez, and there is no
+ *  updater, so Providers and General have nothing to set. */
+const HOSTED_HIDDEN: ReadonlySet<SectionId> = new Set(["keys", "general"]);
+const SECTIONS = HOSTED_UI ? ALL_SECTIONS.filter(({ id }) => !HOSTED_HIDDEN.has(id)) : ALL_SECTIONS;
+const DEFAULT_SECTION: SectionId = HOSTED_UI ? "agent" : "keys";
+/** A deep link to a hidden section lands on the default one instead. */
+const visibleSection = (id: SectionId): SectionId => (HOSTED_UI && HOSTED_HIDDEN.has(id) ? DEFAULT_SECTION : id);
 
 /** `open(section?, row?)` — the optional ROW deep-links into the Keys
  *  section with that row unfolded (zero-keys wave: the dictation error's
@@ -85,7 +93,7 @@ export function SettingsDialogProvider({
 	const [landOn, setLandOn] = useState<SectionId>("keys");
 	const [landOnRow, setLandOnRow] = useState<string | null>(null);
 	const open = useCallback((section?: string, row?: string) => {
-		setLandOn(section ? section as SectionId : "keys");
+		setLandOn(visibleSection(section ? section as SectionId : DEFAULT_SECTION));
 		setLandOnRow(row ?? null);
 		setShow(true);
 	}, []);
@@ -133,7 +141,7 @@ function SettingsDialog({
  *  (portals render nothing under renderToStaticMarkup). */
 export function SettingsDialogBody({
 	onClose,
-	initialSection = "keys",
+	initialSection = DEFAULT_SECTION,
 	initialRow = null,
 }: {
 	onClose: () => void;
@@ -180,14 +188,14 @@ export function SettingsDialogBody({
 			window.removeEventListener(MENU_CLOSE_EVENT, onClose);
 		};
 	}, []);
-	const [active, setActive] = useState<SectionId>(initialSection);
+	const [active, setActive] = useState<SectionId>(visibleSection(initialSection));
 	// A deep-link fired while the dialog is ALREADY open (first exercised by
 	// the wave-6 embedding picker's "Add a provider key first…" link — the
 	// picker itself died with wave 7, the mechanism is general) changes
 	// initialSection under our feet — follow it, or the link silently does
 	// nothing.
 	useEffect(() => {
-		setActive(initialSection);
+		setActive(visibleSection(initialSection));
 	}, [initialSection]);
 
 	// Fetch once per dialog mount. 200 {settings: null} is FIRST BOOT
