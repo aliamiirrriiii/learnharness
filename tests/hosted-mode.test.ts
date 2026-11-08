@@ -107,3 +107,19 @@ describe("hosted uploads", () => {
 		assert.equal((await upload([new File(["x"], "a.txt")], false)).status, 404);
 	});
 });
+
+describe("hosted skin and chrome", () => {
+	const read = (file: string) => fs.readFileSync(path.join(import.meta.dirname, "..", file), "utf-8");
+
+	it("loads the host's skin only in hosted mode, before the body", () => {
+		const layout = read("app/layout.tsx");
+		assert.match(layout, /\{HOSTED_UI && \(\s*<head>[\s\S]*href="\/__host\/skin\.css"[\s\S]*src="\/__host\/skin\.js"[\s\S]*<\/head>/);
+		assert.match(layout, /suppressHydrationWarning=\{HOSTED_UI\}/, "the skin script may change <html>'s class");
+	});
+
+	it("leaves dictation out of every composer in hosted mode", () => {
+		for (const file of ["components/home.tsx", "components/new-session.tsx", "components/chat.tsx"]) {
+			assert.match(read(file), /dictationSlot=\{HOSTED_UI \? undefined : <DictationBar/, file);
+		}
+	});
+});

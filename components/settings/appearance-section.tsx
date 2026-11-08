@@ -39,6 +39,7 @@ import {
 } from "@/src/core";
 import { MenuShell } from "@/components/menu-shell";
 import { Hint } from "@/components/ui/hint";
+import { HOSTED_UI } from "@/lib/hosted";
 import { DIR, formatNumber, t } from "@/lib/i18n";
 import { useAppearance } from "./appearance.tsx";
 import { FontMenuList } from "./model-menu";
@@ -187,6 +188,8 @@ export function AppearanceSection({
 
 	return (
 		<>
+			{/* Hosted (teeez): mode, colours and faces follow the host app (its skin). */}
+			{!HOSTED_UI && (<>
 			<SettingsRow label={t("Mode")} hint={t("Coming soon")} testid="row-mode" dimmed>
 				<ThinSelect value="dark" ariaLabel={t("mode")} onChange={() => {}} testid="select-mode" disabled>
 					<option value="dark">{t("Dark")}</option>
@@ -261,6 +264,7 @@ export function AppearanceSection({
 					)}
 				</span>
 			</SettingsRow>
+			</>)}
 			<SettingsRow label={t("Reading font size")} hint={t("{n}px", { n: resolved.proseFontSize })} testid="row-prose-size">
 				<CommitInput
 					type="number"
@@ -282,6 +286,8 @@ export function AppearanceSection({
 					}}
 				/>
 			</SettingsRow>
+			{/* Hosted (teeez): the host skin sets title faces and heading weight. */}
+			{!HOSTED_UI && (<>
 			<SettingsRow label={t("Session names in serif")} testid="row-session-serif">
 				<Toggle
 					checked={appearance?.sessionNameSerif ?? true}
@@ -312,6 +318,7 @@ export function AppearanceSection({
 					}}
 				/>
 			</SettingsRow>
+			</>)}
 			{/* The emphasis inks default to the REGULAR TEXT COLOR now
 			    (appearance wave, 2026-09-26) — the empty-state labels say
 			    so; explicit hex overrides ride unchanged. */}

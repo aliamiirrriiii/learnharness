@@ -8,6 +8,7 @@ import { MinimalHome } from "@/components/minimal-home";
 import { SetupDialog } from "@/components/setup-dialog";
 import { ComposerActions, NodePickerControl } from "@/components/composer-actions";
 import { useModelSetup, selectedModelUnavailable, openModelPicker, ZeroKeysPill } from "@/components/setup-cta";
+import { HOSTED_UI } from "@/lib/hosted";
 import { DictationBar, joinDictation, useDictation } from "@/components/dictation";
 import { useFieldCycle } from "@/components/field-cycle";
 import { SidebarToggle } from "@/components/sidebar";
@@ -296,7 +297,7 @@ export function Home({
 					    while the RIGHT keeps the strong-slot control (fix wave: the
 					    pills write /api/settings/models). */}
 					<StatsBar
-						dictationSlot={<DictationBar dictation={dictation} />}
+						dictationSlot={HOSTED_UI ? undefined : <DictationBar dictation={dictation} />}
 						turns={[] as TurnUsage[]}
 						leadingSlot={
 							<div className="flex items-center gap-0.5 rounded-md border border-border/60 bg-background p-0.5" data-testid="home-mode-switch">

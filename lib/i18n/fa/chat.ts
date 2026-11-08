@@ -259,4 +259,8 @@ export const CHAT: Record<string, string> = {
 	"Drop to attach files": "برای پیوست فایل رها کنید",
 	"Drop to attach file paths": "برای پیوست مسیر فایل رها کنید",
 	"Dismiss attachment notice": "بستن پیام پیوست",
+	// dictation.tsx
+	"Dictate": "گفتن به‌جای نوشتن",
+	"Start dictation": "شروع گفتار",
+	"Dictation failed: {error}": "گفتار ناموفق بود: {error}",
 };
