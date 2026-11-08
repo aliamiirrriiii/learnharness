@@ -13,6 +13,8 @@ export function LhMark({ className = "" }: { className?: string }) {
 		<svg
 			viewBox="0 0 806 806"
 			className={className}
+			// A host skin's hook: the mark is drawn for dark backgrounds.
+			data-lh-mark=""
 			style={{ fillRule: "evenodd", clipRule: "evenodd", strokeLinejoin: "round", strokeMiterlimit: 2 }}
 			aria-hidden="true"
 		>

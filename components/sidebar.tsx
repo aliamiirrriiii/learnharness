@@ -23,6 +23,7 @@ import { useServerEvent, useServerResync } from "@/components/server-events";
 import type { ChatListItem } from "@/src/core";
 import { kbdEventForAction } from "@/src/core";
 import { notifySettingsSaved } from "@/components/settings-signal";
+import { HOSTED_UI } from "@/lib/hosted";
 
 /**
  * Toggleable sidebar — NOT a modal drawer: no backdrop, no focus theft. It
@@ -132,8 +133,12 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 		void window.lh?.getZoom?.().then(setZoomVar);
 
 		const stored = localStorage.getItem(STORAGE_KEY);
-		// Default: open (first run introduces the sidebar).
-		setOpen(stored === null ? true : stored === "1");
+		// Default: open (first run introduces the sidebar). Hosted (teeez) on a
+		// phone-sized screen starts closed instead, without saving that as the
+		// person's choice: the sidebar would take most of the screen, and the
+		// toggle still opens it.
+		const narrowHosted = HOSTED_UI && window.innerWidth < SIDEBAR_AUTOCLOSE;
+		setOpen(narrowHosted ? false : stored === null ? true : stored === "1");
 		setMounted(true);
 		return () => off?.();
 	}, []);
