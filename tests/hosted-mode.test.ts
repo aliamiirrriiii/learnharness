@@ -121,5 +121,8 @@ describe("hosted skin and chrome", () => {
 		for (const file of ["components/home.tsx", "components/new-session.tsx", "components/chat.tsx"]) {
 			assert.match(read(file), /dictationSlot=\{HOSTED_UI \? undefined : <DictationBar/, file);
 		}
+		const dictation = read("components/dictation.tsx");
+		assert.match(dictation, /if \(!HOSTED_UI\) warmTokens\.refresh\(\)/, "no token pre-mint");
+		assert.match(dictation, /if \(HOSTED_UI\) return;\n\t\twindow\.addEventListener\("lh:kbd-toggle-dictation"/, "no shortcut");
 	});
 });

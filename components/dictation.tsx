@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2Icon, MicIcon } from "lucide-react";
 import { useSettingsDialog } from "@/components/settings/settings-dialog";
 import { Hint } from "@/components/ui/hint";
+import { HOSTED_UI } from "@/lib/hosted";
 import { t } from "@/lib/i18n";
 import { deepgramListenUrl, type DictationLanguage } from "@/src/core";
 import { useDictationLanguage } from "@/components/dictation-preference";
@@ -601,7 +602,8 @@ export function useDictation({ append }: { append: (text: string) => void }): Di
 	// page owns ONE hook instance, and only the mounted page's listener is
 	// attached.
 	useEffect(() => {
-		warmTokens.refresh(); // pre-mint at mount (mitigation D) — silent if keyless
+		// Hosted (teeez): no dictation (no person's own Deepgram key), so nothing to pre-mint.
+		if (!HOSTED_UI) warmTokens.refresh(); // pre-mint at mount (mitigation D) — silent if keyless
 		return () => {
 			// Navigation cancels capture: invalidate every pending await before
 			// releasing resources, and never append into a different page's input.
@@ -610,6 +612,8 @@ export function useDictation({ append }: { append: (text: string) => void }): Di
 		};
 	}, [cleanup]);
 	useEffect(() => {
+		// Hosted: ⌘D stays the browser's (the composer shows no dictation either).
+		if (HOSTED_UI) return;
 		window.addEventListener("lh:kbd-toggle-dictation", toggle);
 		return () => window.removeEventListener("lh:kbd-toggle-dictation", toggle);
 	}, [toggle]);
