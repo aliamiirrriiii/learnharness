@@ -172,9 +172,13 @@ export function QuestionDock({
 	);
 }
 
-/** A plain-text teaser of a question for the collapsed bar: unwrap math, flatten common LaTeX. */
-function teaserText(q: string): string {
+/** A plain-text teaser of a question for the collapsed bar: a code block becomes
+ *  an ellipsis (flattened to one line it read as a run of symbols, its fence
+ *  marks showing), inline code loses its backticks; unwrap math, flatten common LaTeX. */
+export function teaserText(q: string): string {
 	return repairMathForDisplay(q)
+		.replace(/```[\s\S]*?(?:```|$)/g, " … ")
+		.replace(/`([^`\n]*)`/g, "$1")
 		.replace(/\\\(([\s\S]*?)\\\)/g, "$1") // \(...\) inline math
 		.replace(/\\\[([\s\S]*?)\\\]/g, "$1") // \[...\] display math
 		.replace(/\$\$?([^$]*)\$\$?/g, "$1") // standard $...$/$$...$$ math

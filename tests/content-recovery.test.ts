@@ -114,3 +114,22 @@ test("recovery converges after one pass, including multiple debris characters", 
 		assert.equal(repairMathForDisplay(once), once);
 	}
 });
+test("a question escaped twice in a tool's arguments gets its code block back (teeez, 2026-11-08)", () => {
+	// As the probe tool received it: no real line break, the fence opened on an escaped one.
+	const sent = "کد پایتون زیر چه چیزی چاپ می‌کند؟\\n\\n```python\\nclass Dog(Animal):\\n    def speak(self):\\n        return \\\"Woof\\\"\\n```";
+	const shown = repairMathForDisplay(sent);
+	assert.equal(shown, "کد پایتون زیر چه چیزی چاپ می‌کند؟\n\n```python\nclass Dog(Animal):\n    def speak(self):\n        return \"Woof\"\n```");
+	assert.equal(repairMathForDisplay(shown), shown, "decoding happens once");
+});
+test("a real line break, or no escaped fence, leaves the text as it was", () => {
+	const fenced = "Read:\n\n```python\nprint(\"a\\nb\")\n```";
+	assert.equal(repairMathForDisplay(fenced), fenced, "an escape inside real code stays");
+	const inline = "Type `\\n` for a new line, and `\\\"` for a quote.";
+	assert.equal(repairMathForDisplay(inline), inline, "no fence: nothing to decode");
+});
+test("code on a right-to-left page is a left-to-right island (teeez, 2026-11-08)", async () => {
+	const { readFileSync } = await import("node:fs");
+	const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
+	assert.match(css, /:root\[dir="rtl"\] code \{ direction: ltr; unicode-bidi: isolate; \}/);
+	assert.match(css, /:root\[dir="rtl"\] pre,\n:root\[dir="rtl"\] \[data-streamdown="code-block-body"\] \{ direction: ltr; text-align: left; \}/);
+});

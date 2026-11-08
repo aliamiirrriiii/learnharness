@@ -175,9 +175,21 @@ export function outsideTexComments(body: string, transform: (part: string) => st
 	out.push(transform(body.slice(from))); return out.join("");
 }
 
+/** A whole text escaped twice, as models sometimes send code in a tool's
+ * arguments (teeez, 2026-11-08: every probe question with code showed literal
+ * `\\n` and one long inline code span). A fenced block cannot exist on one
+ * line, so a text with no real line break that opens a fence on an escaped
+ * one is decoded once: `\\n`, `\\t`, `\\"` and `\\\\`. Anything else is
+ * left alone. */
+export function decodeTwiceEscaped(text: string): string {
+	if (text.includes("\n") || !/(?:^|[^\\])```[\w+-]*\\n/.test(text)) return text;
+	return text.replace(/\\(["\\nt])/g, (_whole: string, c: string) => (c === "n" ? "\n" : c === "t" ? "\t" : c));
+}
+
 /** Document escapes are not arbitrary string decoding. Complete known TeX
  * words win over the prefix `\\n`; code is never inspected or rewritten. */
-export function recoverDocumentLayout(text: string): string {
+export function recoverDocumentLayout(input: string): string {
+	const text = decodeTwiceEscaped(input);
 	const spans = readContentSpans(text);
 	const candidates = spans.filter(span => span.kind !== "code").map(span => span.raw).join("\u0000");
 	const declared = new Set([

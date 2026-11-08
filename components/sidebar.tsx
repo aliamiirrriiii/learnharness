@@ -54,6 +54,8 @@ import type { ChatGPTControlBridge, NativeSubscriptionControlBridge } from "@/sr
 import type { UpdateState } from "@/components/settings/update-settings.tsx";
 import { FilePathDropZone } from "@/components/file-path-drop-zone";
 const SIDEBAR_AUTOCLOSE = 928;
+/** Hosted: a screen this narrow is a phone (a portrait tablet is 768). */
+const HOSTED_PHONE_MAX = 768;
 
 // Module scope, guarded for SSR (the server has no navigator).
 const IS_ELECTRON = typeof navigator !== "undefined" && navigator.userAgent.includes("Electron");
@@ -134,10 +136,11 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 
 		const stored = localStorage.getItem(STORAGE_KEY);
 		// Default: open (first run introduces the sidebar). Hosted (teeez) on a
-		// phone-sized screen starts closed instead, without saving that as the
-		// person's choice: the sidebar would take most of the screen, and the
-		// toggle still opens it.
-		const narrowHosted = HOSTED_UI && window.innerWidth < SIDEBAR_AUTOCLOSE;
+		// phone starts closed instead, without saving that as the person's
+		// choice: the sidebar would take most of the screen, and the toggle
+		// still opens it. The screen, not the window: inside the host's frame
+		// the window is narrower than the laptop it sits on.
+		const narrowHosted = HOSTED_UI && window.screen.width < HOSTED_PHONE_MAX;
 		setOpen(narrowHosted ? false : stored === null ? true : stored === "1");
 		setMounted(true);
 		return () => off?.();

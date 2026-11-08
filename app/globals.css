@@ -120,6 +120,14 @@
 @font-face { font-family: "lh-fa"; src: url("/fonts/Vazirmatn-FD-NL-SemiBold.ttf") format("truetype"); font-weight: 600; font-display: swap; }
 @font-face { font-family: "lh-fa"; src: url("/fonts/Vazirmatn-FD-NL-Bold.ttf") format("truetype"); font-weight: 700 900; font-display: swap; }
 :root[lang="fa"] { --lh-fa-lead: "lh-fa",; }
+/* Code reads left to right on a right-to-left page (teeez, 2026-11-08): an
+   option `[1, 2, 3] [3]` drew as [3] [1, 2, 3], because the bidi algorithm
+   reorders the space-separated runs of an unisolated code span inside Persian
+   text. Inline code is its own left-to-right island; a code block is a
+   left-to-right block. */
+:root[dir="rtl"] code { direction: ltr; unicode-bidi: isolate; }
+:root[dir="rtl"] pre,
+:root[dir="rtl"] [data-streamdown="code-block-body"] { direction: ltr; text-align: left; }
 
 @theme inline {
 	/* Fonts: chrome = JetBrains Mono, prose = Source Sans 3, titles = CMU
