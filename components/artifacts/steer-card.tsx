@@ -67,15 +67,15 @@ export function SubagentSteerCard({ message }: { message: LhViewMessage }) {
 function jobKindLabel(kind: string): string {
 	switch (kind) {
 		case "research":
-			return t("Research");
+			return t("research");
 		case "demo":
-			return t("Demo");
+			return t("demo");
 		case "visual":
-			return t("Figure");
+			return t("visual");
 		case "pdf":
 			return "PDF";
 		case "job":
-			return t("Job");
+			return t("job");
 		default:
 			return kind;
 	}
