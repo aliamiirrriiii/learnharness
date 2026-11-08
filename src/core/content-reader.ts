@@ -179,24 +179,27 @@ export function outsideTexComments(body: string, transform: (part: string) => st
  * arguments (teeez, 2026-11-08: every probe question with code showed literal
  * `\\n` and one long inline code span). A fenced block cannot exist on one
  * line, so a text with no real line break that opens a fence on an escaped
- * one is a candidate. It is decoded once (`\\n`, `\\r`, `\\t`, `\\"`,
- * `\\\\`) only when every escape fits: escaped twice, every odd run of
- * backslashes is a JSON escape, while TeX commands carry an even run. An odd
- * run before a TeX command (`\\nabla`, `\\frac`) means the text was written
- * once, with layout escapes beside real TeX: that is recoverDocumentLayout's
- * case, and nothing is decoded here. */
+ * one is a candidate. Inside its fences everything is code. In the prose
+ * around them, escaped twice, every odd run of backslashes is a JSON escape
+ * (`\\n`, `\\t`, `\\r` before `\\n`, `\\"`, `\\uXXXX`) while TeX carries
+ * an even run; an odd run before a TeX command (`\\nabla`, `\\frac`) means
+ * the text was written once, with layout escapes beside real TeX, which is
+ * recoverDocumentLayout's case: then nothing is decoded here. */
 const FENCE_ON_ESCAPED_LINE = /(?:^|[^\\])(?:```|~~~)[^\\`~]*?(?:\\r)?\\n/;
+const FENCE_MARK = /```|~~~/;
 export function decodeTwiceEscaped(text: string): string {
 	if (text.includes("\n") || !FENCE_ON_ESCAPED_LINE.test(text)) return text;
-	for (const m of text.matchAll(/(\\+)([A-Za-z]*)/g)) {
+	const prose = text.split(FENCE_MARK).filter((_part, i) => i % 2 === 0).join("\u0000");
+	for (const m of prose.matchAll(/(\\+)([A-Za-z]*)/g)) {
 		const [whole, slashes, word] = m;
 		if (slashes!.length % 2 === 0) continue;
-		// `\\r` is a TeX accent as well as a carriage return: only CRLF reads as the escape.
-		if (word === "r" && text.startsWith("\\n", m.index! + whole!.length)) continue;
-		if (word ? !/^[nt]/.test(word) || knownTexCommand(word) : text[m.index! + whole!.length] !== '"') return text;
+		const after = m.index! + whole!.length;
+		if (word === "r" && prose.startsWith("\\n", after)) continue;
+		if (/^u[0-9a-fA-F]{4}/.test(word!) || /^u[0-9a-fA-F]{0,3}$/.test(word!) && /^[0-9a-fA-F]/.test(prose.slice(after))) continue;
+		if (word ? !/^[nt]/.test(word) || knownTexCommand(word) : prose[after] !== '"') return text;
 	}
-	return text.replace(/\\(["\\nrt])/g, (_whole: string, c: string) =>
-		(c === "n" ? "\n" : c === "t" ? "\t" : c === "r" ? "" : c));
+	return text.replace(/\\(?:u([0-9a-fA-F]{4})|(["\\nrt]))/g, (_whole: string, hex: string | undefined, c: string | undefined) =>
+		(hex ? String.fromCharCode(parseInt(hex, 16)) : c === "n" ? "\n" : c === "t" ? "\t" : c === "r" ? "" : c!));
 }
 
 /** Document escapes are not arbitrary string decoding. Complete known TeX

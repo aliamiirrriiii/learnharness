@@ -153,3 +153,8 @@ test("escaped fences after CRLF, with ~~~ or with an info string like c# are rec
 	assert.equal(decodeTwiceEscaped("Q\\n~~~\\nx = 1\\n~~~"), "Q\n~~~\nx = 1\n~~~");
 	assert.equal(decodeTwiceEscaped("Q\\n```c#\\nvar s = \\\"a\\\\nb\\\";\\n```"), "Q\n```c#\nvar s = \"a\\nb\";\n```");
 });
+test("code lines that spell TeX after the escape still decode: i = 0, tau, nu (review of b497b0e0)", async () => {
+	const { decodeTwiceEscaped } = await import("../src/core/content-reader.ts");
+	const sent = "با جدول وضعیت ردگیری کن\\u200cبه\\n\\n```python\\ni = 0\\nnu = 1\\n\\tau = 2\\nmid = (lo + hi) // 2\\n```";
+	assert.equal(decodeTwiceEscaped(sent), "با جدول وضعیت ردگیری کن‌به\n\n```python\ni = 0\nnu = 1\n\tau = 2\nmid = (lo + hi) // 2\n```");
+});

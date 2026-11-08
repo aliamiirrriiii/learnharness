@@ -140,8 +140,10 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 		// choice: the sidebar would take most of the screen, and the toggle
 		// still opens it. The screen, not the window: inside the host's frame
 		// the window is narrower than the laptop it sits on; its shorter side,
-		// because Android swaps width and height in landscape.
-		const narrowHosted = HOSTED_UI && Math.min(window.screen.width, window.screen.height) < HOSTED_PHONE_MAX;
+		// because Android swaps width and height in landscape; and a touch
+		// screen, because a 1080p laptop at 150% is 720 points tall.
+		const narrowHosted = HOSTED_UI && window.matchMedia("(pointer: coarse)").matches
+			&& Math.min(window.screen.width, window.screen.height) < HOSTED_PHONE_MAX;
 		setOpen(narrowHosted ? false : stored === null ? true : stored === "1");
 		setMounted(true);
 		return () => off?.();
