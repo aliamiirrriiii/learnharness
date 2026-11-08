@@ -1,5 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { HOSTED } from "../../../config.ts";
 
 /** Learner-source policy seam, based on lickbot's #157. The server supplies
  * current preferences per operation; agents never import the settings store.
@@ -17,7 +18,10 @@ export interface ResolvedFileAccessPolicy {
 }
 
 const OPEN_POLICY: FileAccessPolicy = { restricted: false, folders: [] };
-let currentPolicy: () => FileAccessPolicy = () => OPEN_POLICY;
+/** Hosted mode (teeez fork) starts closed: until the server installs the real
+ * provider (the uploads folder, server/file-access.ts), no learner file is read. */
+const CLOSED_POLICY: FileAccessPolicy = { restricted: true, folders: [] };
+let currentPolicy: () => FileAccessPolicy = () => (HOSTED ? CLOSED_POLICY : OPEN_POLICY);
 
 export function setFileAccessPolicy(provider: () => FileAccessPolicy): void { currentPolicy = provider; }
 
