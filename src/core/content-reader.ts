@@ -179,11 +179,24 @@ export function outsideTexComments(body: string, transform: (part: string) => st
  * arguments (teeez, 2026-11-08: every probe question with code showed literal
  * `\\n` and one long inline code span). A fenced block cannot exist on one
  * line, so a text with no real line break that opens a fence on an escaped
- * one is decoded once: `\\n`, `\\t`, `\\"` and `\\\\`. Anything else is
- * left alone. */
+ * one is a candidate. It is decoded once (`\\n`, `\\r`, `\\t`, `\\"`,
+ * `\\\\`) only when every escape fits: escaped twice, every odd run of
+ * backslashes is a JSON escape, while TeX commands carry an even run. An odd
+ * run before a TeX command (`\\nabla`, `\\frac`) means the text was written
+ * once, with layout escapes beside real TeX: that is recoverDocumentLayout's
+ * case, and nothing is decoded here. */
+const FENCE_ON_ESCAPED_LINE = /(?:^|[^\\])(?:```|~~~)[^\\`~]*?(?:\\r)?\\n/;
 export function decodeTwiceEscaped(text: string): string {
-	if (text.includes("\n") || !/(?:^|[^\\])```[\w+-]*\\n/.test(text)) return text;
-	return text.replace(/\\(["\\nt])/g, (_whole: string, c: string) => (c === "n" ? "\n" : c === "t" ? "\t" : c));
+	if (text.includes("\n") || !FENCE_ON_ESCAPED_LINE.test(text)) return text;
+	for (const m of text.matchAll(/(\\+)([A-Za-z]*)/g)) {
+		const [whole, slashes, word] = m;
+		if (slashes!.length % 2 === 0) continue;
+		// `\\r` is a TeX accent as well as a carriage return: only CRLF reads as the escape.
+		if (word === "r" && text.startsWith("\\n", m.index! + whole!.length)) continue;
+		if (word ? !/^[nt]/.test(word) || knownTexCommand(word) : text[m.index! + whole!.length] !== '"') return text;
+	}
+	return text.replace(/\\(["\\nrt])/g, (_whole: string, c: string) =>
+		(c === "n" ? "\n" : c === "t" ? "\t" : c === "r" ? "" : c));
 }
 
 /** Document escapes are not arbitrary string decoding. Complete known TeX

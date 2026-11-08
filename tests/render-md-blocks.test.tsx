@@ -28,7 +28,7 @@ describe("md-blocks — code", () => {
 	it("inline code passes through with the house inline styling", () => {
 		const html = render("a `term` b");
 		assert.ok(html.includes('data-streamdown="inline-code"'), "inline code keeps the inline-code path");
-		assert.match(html, /a <code (?:dir="auto" )?class="rounded px-1\.5 py-0\.5 font-mono text-sm"[^>]*>term<\/code> b/, "inline semantics, spacing and typography stay intact");
+		assert.match(html, /a <code (?:dir="(?:auto|ltr)" )?class="rounded px-1\.5 py-0\.5 font-mono text-sm"[^>]*>term<\/code> b/, "inline semantics, spacing and typography stay intact");
 		assert.ok(!html.includes("bg-muted"), "inline code no longer uses the question-card surface");
 	});
 

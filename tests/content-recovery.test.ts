@@ -127,9 +127,29 @@ test("a real line break, or no escaped fence, leaves the text as it was", () => 
 	const inline = "Type `\\n` for a new line, and `\\\"` for a quote.";
 	assert.equal(repairMathForDisplay(inline), inline, "no fence: nothing to decode");
 });
-test("code on a right-to-left page is a left-to-right island (teeez, 2026-11-08)", async () => {
+test("code on a right-to-left page reads left to right; Persian in code keeps its own (teeez, 2026-11-08)", async () => {
 	const { readFileSync } = await import("node:fs");
 	const css = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8");
-	assert.match(css, /:root\[dir="rtl"\] code \{ direction: ltr; unicode-bidi: isolate; \}/);
+	assert.doesNotMatch(css, /:root\[dir="rtl"\] code \{/, "inline code takes its direction per span (md-blocks.tsx)");
+	const { inlineCodeDir } = await import("../components/md-blocks.tsx");
+	assert.equal(inlineCodeDir("[1, 2, 3] [3]"), "ltr", "no strong letter: left to right, not the page's direction");
+	assert.equal(inlineCodeDir("10 5"), "ltr");
+	assert.equal(inlineCodeDir("نام کاربر"), "auto", "Persian in code keeps its own direction");
 	assert.match(css, /:root\[dir="rtl"\] pre,\n:root\[dir="rtl"\] \[data-streamdown="code-block-body"\] \{ direction: ltr; text-align: left; \}/);
+});
+test("a text written once, with TeX beside layout escapes, is never decoded twice (review of 6cdcf01f)", async () => {
+	const { decodeTwiceEscaped } = await import("../src/core/content-reader.ts");
+	for (const once of [
+		math`Matrix $\begin{pmatrix}a&b\\c&d\end{pmatrix}$:\n\n` + "```python\\nprint(1)\\n```",
+		math`Gradient $\nabla f\neq0$\n\n` + "```python\\nx = 1\\n```",
+		math`Angle $\theta$\n` + "```c\\nint x;\\n```",
+	]) {
+		assert.equal(decodeTwiceEscaped(once), once, once);
+	}
+});
+test("escaped fences after CRLF, with ~~~ or with an info string like c# are recognised", async () => {
+	const { decodeTwiceEscaped } = await import("../src/core/content-reader.ts");
+	assert.equal(decodeTwiceEscaped("Q\\r\\n```python\\r\\nx = 1\\r\\n```"), "Q\n```python\nx = 1\n```");
+	assert.equal(decodeTwiceEscaped("Q\\n~~~\\nx = 1\\n~~~"), "Q\n~~~\nx = 1\n~~~");
+	assert.equal(decodeTwiceEscaped("Q\\n```c#\\nvar s = \\\"a\\\\nb\\\";\\n```"), "Q\n```c#\nvar s = \"a\\nb\";\n```");
 });

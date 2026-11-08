@@ -123,6 +123,14 @@ export function CopyCorner({
 
 /** The fence source from a code element's children — a bare string in the
  *  common case; an element wrapping a string when rehype nests it. Pure. */
+/** Inline code reads left to right unless it holds right-to-left letters
+ *  (teeez, 2026-11-08): `dir="auto"` finds no strong letter in `[1, 2, 3] [3]`
+ *  or `10 5`, falls back to the Persian page's direction, and the bidi
+ *  algorithm then draws the runs in reverse order. */
+export function inlineCodeDir(children: ReactNode): "ltr" | "auto" {
+	return /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/.test(codeSource(children)) ? "auto" : "ltr";
+}
+
 export function codeSource(children: ReactNode): string {
 	if (typeof children === "string") return children;
 	if (typeof children === "number") return String(children);
@@ -241,7 +249,7 @@ export function MarkdownCode(props: ComponentProps<"code"> & ExtraProps) {
 	// Inline code: no data-block (the pre handler stamps block fences only).
 	if (!("data-block" in props)) {
 		return (
-			<code dir="auto" className={cn("rounded px-1.5 py-0.5 font-mono text-sm", className)} data-streamdown="inline-code" {...rest}>
+			<code dir={inlineCodeDir(children)} className={cn("rounded px-1.5 py-0.5 font-mono text-sm", className)} data-streamdown="inline-code" {...rest}>
 				{children}
 			</code>
 		);

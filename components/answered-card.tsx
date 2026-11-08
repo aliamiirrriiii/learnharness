@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { t } from "@/lib/i18n";
 import { ToolContentResponse } from "@/components/ai-elements/message";
 import type { QuestionAnswerData } from "@/src/core";
-import { answerForPresentation, parseAskInput, parseQuizInput } from "@/src/core";
+import { answerForPresentation, parseAskInput, parseQuizInput, repairMathForDisplay } from "@/src/core";
 
 /**
  * Static rendering of an answered question (tool part in `output-available`).
@@ -27,7 +27,7 @@ export function AnsweredCard({ answer: savedAnswer, input }: { answer: QuestionA
 	if (answer.dismissed) {
 		return (
 			<div className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">
-				<span className="font-medium">{answer.questionText}</span>{t(" — skipped")}
+				<span className="font-medium">{repairMathForDisplay(answer.questionText)}</span>{t(" — skipped")}
 			</div>
 		);
 	}

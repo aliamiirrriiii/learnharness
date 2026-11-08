@@ -118,7 +118,7 @@ describe("hosted skin and chrome", () => {
 	});
 
 	it("starts the sidebar closed on a phone (its screen, not the frame) without saving that", () => {
-		assert.match(read("components/sidebar.tsx"), /const narrowHosted = HOSTED_UI && window\.screen\.width < HOSTED_PHONE_MAX;\n\t\tsetOpen\(narrowHosted \? false :/);
+		assert.match(read("components/sidebar.tsx"), /const narrowHosted = HOSTED_UI && Math\.min\(window\.screen\.width, window\.screen\.height\) < HOSTED_PHONE_MAX;\n\t\tsetOpen\(narrowHosted \? false :/);
 		assert.match(read("components/lh-mark.tsx"), /data-lh-mark=""/, "the skin can recolour the mark");
 	});
 
